@@ -142,7 +142,6 @@ NUMBER_CHARACTERS = 15
 LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'posts:index'
 # LOGOUT_REDIRECT_URL = 'posts:index'
-CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
 
 
 #  подключаем движок filebased.EmailBackend
