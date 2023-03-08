@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load cache %}
+{% block title %}
+  Главная страница проекта Yatube
+{% endblock %}
+{% block content %}
+  {% cache 20 index_page %}
+    <h1>Это главная страница проекта Yatube.</h1>
+    <h3>Всего постов в проекте: {{ page_obj.paginator.count }} </h3>
+    {% include 'includes/switcher.html' %}
+    {% for post in page_obj %}
+      {% include 'includes/post_inf.html' %}
+      {% if not forloop.last %}<hr>{% endif %}
+    {% endfor %}
+    {% include 'includes/paginator.html' %}
+  {% endcache %}
+{% endblock %}

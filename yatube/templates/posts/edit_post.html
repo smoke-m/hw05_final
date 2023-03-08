@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Редактировать пост{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 p-5">
+    <div class="card">
+      <div class="card-header">Редактировать пост</div>
+      {% include 'includes/form_processing.html' %}
+    </div> <!-- card -->
+  </div> <!-- col -->
+</div> <!-- row -->
+{% endblock %}

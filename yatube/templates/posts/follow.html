@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}
+  Посты авторов, на которых подписан пользователь
+{% endblock %}
+{% block content %}
+  <h1>Посты авторов, на которых подписан пользователь.</h1>
+  <h3>Всего постов: {{ page_obj.paginator.count }} </h3>
+  {% include 'includes/switcher.html' %}
+  {% for post in page_obj %}
+    {% include 'includes/post_inf.html' %}
+    {% if not forloop.last %}<hr>{% endif %}
+  {% endfor %}
+  {% include 'includes/paginator.html' %}
+{% endblock %}
