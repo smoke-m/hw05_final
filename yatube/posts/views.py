@@ -35,7 +35,7 @@ def profile(request, username):
     template = 'posts/profile.html'
     author = get_object_or_404(User, username=username)
     posts = author.posts.select_related('group')
-    following = (request.user != author) and author.following.exists()
+    following = author.following.exists()
     context = {
         'author': author,
         'page_obj': paginator_def(posts, request.GET.get('page')),
