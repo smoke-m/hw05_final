@@ -73,7 +73,7 @@ class PostsViewsPagesTests(TestCase):
         value_expected = [(post.text, self.post.text),
                           (post.group, self.post.group),
                           (post.author, self.post.author),
-                          (post.image, f'posts/{self.image.name}'),]
+                          (post.image, f'posts/{self.image.name}')]
         for value, expected in value_expected:
             with self.subTest(value=value):
                 self.assertEqual(value, expected)
@@ -103,7 +103,7 @@ class PostsViewsPagesTests(TestCase):
             self.POST_DETAIL).context['comments'][0]
         value_expected = [(response.text, self.comment.text),
                           (response.post, self.comment.post),
-                          (response.author, self.comment.author),]
+                          (response.author, self.comment.author)]
         for value, expected in value_expected:
             with self.subTest(value=value):
                 self.assertEqual(value, expected)
