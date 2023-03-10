@@ -109,8 +109,11 @@ class PostsViewsPagesTests(TestCase):
                 self.assertEqual(value, expected)
 
     def test_post_added(self):
-        """При создании пост появляется в index, group_posts_list, profile"""
-        reverses = [self.INDEX, self.GROUP_POSTS, self.PROFILE]
+        """При создании пост появляется в index,
+           group_posts_list, profile, follow_index"""
+        reverses = [self.INDEX, self.GROUP_POSTS,
+                    self.PROFILE, self.FOLLOW_INDEX]
+        self.authorized_auth.force_login(self.user)
         for revers in reverses:
             with self.subTest(revers=revers):
                 self._test_right_context(self.authorized_auth.get(
@@ -131,16 +134,10 @@ class PostsViewsPagesTests(TestCase):
                 response = self.authorized_auth.get(value).context['page_obj']
                 self.assertNotIn(self.post, response, error)
 
-    def test_foll_not_get_into_another_user(self):
-        """Новая запись пользователя появляется в ленте тех, кто на
-        него подписан и не появляется в ленте тех, кто не подписан."""
-        users_value = [(self.user, 1), (self.auth, 0)]
-        for user, value in users_value:
-            with self.subTest(user=user):
-                self.guest_client.force_login(user)
-                posts = self.guest_client.get(
-                    self.FOLLOW_INDEX).context['page_obj']
-                self.assertEqual(len(posts), value)
+    def test_foll_not_into_another_user(self):
+        """Новая запись не появляется в ленте тех, кто не подписан."""
+        posts = self.authorized_auth.get(self.FOLLOW_INDEX).context['page_obj']
+        self.assertNotIn(self.post, posts)
 
     def test_correct_pages_context(self):
         """Проверка количества постов первой и последней страницах."""
@@ -174,3 +171,33 @@ class PostsViewsPagesTests(TestCase):
         cache.clear()
         posts_clear = self.guest_client.get(self.INDEX).content
         self.assertNotEqual(posts_del, posts_clear)
+
+    def test_added_follow_in_database(self):
+        """после успешной подписки, подписка появляется в базе."""
+        Follow.objects.all().delete()
+        form_data = {'user': self.user, 'author': self.auth}
+        self.authorized_auth.force_login(self.user)
+        response = self.authorized_auth.post(
+            reverse('posts:profile_follow',
+                    kwargs={'username': self.auth}),
+            data=form_data,
+            follow=True)
+        self.assertEqual(Follow.objects.count(), 1)
+        self.assertRedirects(response, self.FOLLOW_INDEX)
+        new_follow = Follow.objects.latest('user', 'author')
+        filds_expected = [
+            (new_follow.author, self.auth),
+            (new_follow.user, self.user),
+        ]
+        for filds, expected in filds_expected:
+            with self.subTest(filds=filds):
+                self.assertEqual(filds, expected)
+
+    def test_delete_follow_in_database(self):
+        """после успешного удаления, подписка удаляется в базе."""
+        self.authorized_auth.force_login(self.user)
+        response = self.authorized_auth.post(
+            reverse('posts:profile_unfollow',
+                    kwargs={'username': self.auth}))
+        self.assertEqual(Follow.objects.count(), 0)
+        self.assertRedirects(response, self.FOLLOW_INDEX)

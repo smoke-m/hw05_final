@@ -6,7 +6,7 @@ from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from ..models import Group, Post, Comment, Follow, User
+from ..models import Group, Post, Comment, User
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -134,30 +134,3 @@ class PostsFormsPagesTests(TestCase):
         for filds, expected in filds_expected:
             with self.subTest(filds=filds):
                 self.assertEqual(filds, expected)
-
-    def test_added_delete_follow_in_database(self):
-        """после успешной подписки(удаления),
-           подписка появляется(удаляется) в базе."""
-        Follow.objects.all().delete()
-        form_data = {'user': self.user, 'author': self.auth}
-        self.authorized_auth.force_login(self.user)
-        response = self.authorized_auth.post(
-            reverse('posts:profile_follow',
-                    kwargs={'username': self.auth}),
-            data=form_data,
-            follow=True)
-        self.assertEqual(Follow.objects.count(), 1)
-        self.assertRedirects(response, reverse('posts:follow_index'))
-        new_follow = Follow.objects.latest('user', 'author')
-        filds_expected = [
-            (new_follow.author, self.auth),
-            (new_follow.user, self.user),
-        ]
-        for filds, expected in filds_expected:
-            with self.subTest(filds=filds):
-                self.assertEqual(filds, expected)
-        response = self.authorized_auth.post(
-            reverse('posts:profile_unfollow',
-                    kwargs={'username': self.auth}))
-        self.assertEqual(Follow.objects.count(), 0)
-        self.assertRedirects(response, reverse('posts:follow_index'))

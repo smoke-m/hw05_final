@@ -15,8 +15,6 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    class Meta:
-        ordering = ('-pub_date',)
     text = models.TextField(
         verbose_name='текст поста',
         help_text='Введите текст поста',
@@ -48,13 +46,14 @@ class Post(models.Model):
         blank=True,
     )
 
+    class Meta:
+        ordering = ('-pub_date',)
+
     def __str__(self):
         return self.text[:settings.NUMBER_CHARACTERS]
 
 
 class Comment(models.Model):
-    class Meta:
-        ordering = ('-created',)
     post = models.ForeignKey(
         Post,
         on_delete=models.SET_NULL,
@@ -81,6 +80,9 @@ class Comment(models.Model):
         help_text='Дата публикации комментария',
     )
 
+    class Meta:
+        ordering = ('-created',)
+
     def __str__(self):
         return self.text[:settings.NUMBER_CHARACTERS]
 
@@ -100,6 +102,16 @@ class Follow(models.Model):
         verbose_name='Автор',
         help_text='На кого подписываются',
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'author'],
+                                    name='name of constraint'),
+            models.CheckConstraint(
+                check=~models.Q(user=models.F('author')),
+                name='prevent_self_follow',
+            ),
+        ]
 
     def __str__(self):
         return f'Подписчик {self.user}, Автор {self.author}'
