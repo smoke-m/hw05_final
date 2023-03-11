@@ -35,9 +35,9 @@ def profile(request, username):
     template = 'posts/profile.html'
     author = get_object_or_404(User, username=username)
     posts = author.posts.select_related('group')
-    following = False
-    if request.user.is_authenticated:
-        following = author.following.filter(user=request.user).exists()
+    following = (request.user.is_authenticated and author.following.filter(
+        user=request.user).exists())
+    print(following)
     context = {
         'author': author,
         'page_obj': paginator_def(posts, request.GET.get('page')),
@@ -51,12 +51,11 @@ def post_detail(request, post_id):
     post = get_object_or_404(
         Post.objects.select_related('author', 'group'), pk=post_id)
     post_count = post.author.posts.count()
-    form = CommentForm()
-    comments = post.comments.all()
+    comments = post.comments.select_related('author')
     context = {
         'post_count': post_count,
         'post': post,
-        'form': form,
+        'form': CommentForm(),
         'comments': comments,
     }
     return render(request, template, context)

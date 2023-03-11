@@ -175,13 +175,10 @@ class PostsViewsPagesTests(TestCase):
     def test_added_follow_in_database(self):
         """после успешной подписки, подписка появляется в базе."""
         Follow.objects.all().delete()
-        form_data = {'user': self.user, 'author': self.auth}
         self.authorized_auth.force_login(self.user)
-        response = self.authorized_auth.post(
+        response = self.authorized_auth.get(
             reverse('posts:profile_follow',
-                    kwargs={'username': self.auth}),
-            data=form_data,
-            follow=True)
+                    kwargs={'username': self.auth}))
         self.assertEqual(Follow.objects.count(), 1)
         self.assertRedirects(response, self.FOLLOW_INDEX)
         new_follow = Follow.objects.latest('user', 'author')
@@ -196,8 +193,9 @@ class PostsViewsPagesTests(TestCase):
     def test_delete_follow_in_database(self):
         """после успешного удаления, подписка удаляется в базе."""
         self.authorized_auth.force_login(self.user)
-        response = self.authorized_auth.post(
+        response = self.authorized_auth.get(
             reverse('posts:profile_unfollow',
                     kwargs={'username': self.auth}))
-        self.assertEqual(Follow.objects.count(), 0)
+        self.assertFalse(
+            Follow.objects.filter(user=self.user, author=self.auth).exists())
         self.assertRedirects(response, self.FOLLOW_INDEX)
