@@ -179,16 +179,9 @@ class PostsViewsPagesTests(TestCase):
         response = self.authorized_auth.get(
             reverse('posts:profile_follow',
                     kwargs={'username': self.auth}))
-        self.assertEqual(Follow.objects.count(), 1)
+        self.assertTrue(
+            Follow.objects.filter(user=self.user, author=self.auth).exists())
         self.assertRedirects(response, self.FOLLOW_INDEX)
-        new_follow = Follow.objects.latest('user', 'author')
-        filds_expected = [
-            (new_follow.author, self.auth),
-            (new_follow.user, self.user),
-        ]
-        for filds, expected in filds_expected:
-            with self.subTest(filds=filds):
-                self.assertEqual(filds, expected)
 
     def test_delete_follow_in_database(self):
         """после успешного удаления, подписка удаляется в базе."""
