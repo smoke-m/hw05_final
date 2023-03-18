@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}
+  Подписки {{author.username}}
+{% endblock %}
+{% block content %}
+  <h1>Пользователи на которых подписан {{author.username}}</h1>
+  <h3>Всего Подписок: {{ page_obj.paginator.count }} </h3>
+  {% for following in page_obj %}
+    <a href="{% url 'posts:profile' following.author.username %}">{{ following.author.username }}</a>
+    <p> Электронная почта {{ following.author.username }}: {{ following.author.email }}</p>
+    <p> Полное имя: {{ following.author.username }}: {{ following.author.get_full_name }}</p>
+    {% if not forloop.last %}<hr>{% endif %}
+  {% endfor %}
+  {% include 'includes/paginator.html' %}
+{% endblock %}

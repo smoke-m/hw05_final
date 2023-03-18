@@ -123,11 +123,35 @@ def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
     if author != request.user:
         Follow.objects.get_or_create(user=request.user, author=author)
-    return redirect('posts:follow_index')
+    return redirect('posts:profile', author.username)
 
 
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
     Follow.objects.get(user=request.user, author=author).delete()
-    return redirect('posts:follow_index')
+    return redirect('posts:profile', author.username)
+
+
+@login_required
+def author_followings(request, username):
+    template = 'posts/following.html'
+    author = get_object_or_404(User, username=username)
+    followings = author.following.select_related('user')
+    context = {
+        'page_obj': paginator_def(followings, request.GET.get('page')),
+        'author': author,
+    }
+    return render(request, template, context)
+
+
+@login_required
+def author_followers(request, username):
+    template = 'posts/follower.html'
+    author = get_object_or_404(User, username=username)
+    followers = author.follower.select_related('user')
+    context = {
+        'page_obj': paginator_def(followers, request.GET.get('page')),
+        'author': author,
+    }
+    return render(request, template, context)

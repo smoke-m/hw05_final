@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}
+  Подписчики {{author.username}}
+{% endblock %}
+{% block content %}
+  <h1>Подписчики {{author.username}}</h1>
+  <h3>Всего Подписчиков: {{ page_obj.paginator.count }} </h3>
+  {% for following in page_obj %}
+    <a href="{% url 'posts:profile' following.user.username %}">{{ following.user.username }}</a>
+    <p> Электронная почта {{ following.user.username }}: {{ following.user.email }}</p>
+    <p> Полное имя: {{ following.user.username }}: {{ following.user.get_full_name }}</p>
+    {% if not forloop.last %}<hr>{% endif %}
+  {% endfor %}
+  {% include 'includes/paginator.html' %}
+{% endblock %}

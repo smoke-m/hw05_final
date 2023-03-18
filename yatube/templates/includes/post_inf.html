@@ -22,7 +22,9 @@
     <img class="card-img my-2" src="{{ im.url }}">
   {% endthumbnail %}
   <p>{{ post.text|linebreaksbr }}</p>
-  {% if view_name != 'posts:post_detail' and view_name != 'posts:index' %}
+  {% if view_name != 'posts:post_detail' %}
+    <p> количество комментариев к посту: {{ post.comments.count }}
+      <a href="{% url 'posts:post_detail' post.pk %}">список</a></p>
     <a href="{% url 'posts:post_detail' post.pk %}">подробная информация</a><br>
   {% endif %}
 </article>

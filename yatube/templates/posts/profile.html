@@ -4,8 +4,12 @@
 {% endblock %}
 {% block content %}
     <h1>Все посты пользователя {{ author.get_full_name }}</h1>
-    <h3>Всего постов пользователя: {{ page_obj.paginator.count }} </h3>
+    <h3>Всего постов пользователя: {{ page_obj.paginator.count }}</h3>
     <p> Электронная почта автора: {{ author.email }}</p>
+    <p> Подписано на автора пользователей: {{ author.following.count }}
+      <a href="{% url 'posts:profile_followings' author.username %}">список</a></p>
+    <p> Автор подписан на пользователей: {{ author.follower.count }}
+      <a href="{% url 'posts:profile_followers' author.username %}">список</a></p>
     {% if request.user != author and user.is_authenticated %}
       {% if following %}
       <a
