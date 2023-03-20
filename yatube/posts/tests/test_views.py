@@ -57,6 +57,10 @@ class PostsViewsPagesTests(TestCase):
         cls.POST_EDIT = reverse('posts:post_edit',
                                 kwargs={'post_id': cls.post.id})
         cls.FOLLOW_INDEX = reverse('posts:follow_index')
+        cls.AUTHOR_FOLLOWINGS = reverse('posts:profile_followings',
+                                        kwargs={'username': cls.auth})
+        cls.AUTHOR_FOLLOWERS = reverse('posts:profile_followers',
+                                       kwargs={'username': cls.auth})
         cls.POSTS = 28
 
     @classmethod
@@ -73,6 +77,7 @@ class PostsViewsPagesTests(TestCase):
         value_expected = [(post.text, self.post.text),
                           (post.group, self.post.group),
                           (post.author, self.post.author),
+                          (post.pk, self.post.pk),
                           (post.image, f'posts/{self.image.name}')]
         for value, expected in value_expected:
             with self.subTest(value=value):
@@ -181,7 +186,7 @@ class PostsViewsPagesTests(TestCase):
                     kwargs={'username': self.auth}))
         self.assertTrue(
             Follow.objects.filter(user=self.user, author=self.auth).exists())
-        self.assertRedirects(response, self.FOLLOW_INDEX)
+        self.assertRedirects(response, self.PROFILE)
 
     def test_delete_follow_in_database(self):
         """после успешного удаления, подписка удаляется в базе."""
@@ -191,4 +196,4 @@ class PostsViewsPagesTests(TestCase):
                     kwargs={'username': self.auth}))
         self.assertFalse(
             Follow.objects.filter(user=self.user, author=self.auth).exists())
-        self.assertRedirects(response, self.FOLLOW_INDEX)
+        self.assertRedirects(response, self.PROFILE)

@@ -112,6 +112,7 @@ class Follow(models.Model):
                 name='prevent_self_follow',
             ),
         ]
+        ordering = ('-id',)
 
     def __str__(self):
         return f'Подписчик {self.user}, Автор {self.author}'

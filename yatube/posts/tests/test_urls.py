@@ -3,7 +3,7 @@ from http import HTTPStatus
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from ..models import Group, Post, User
+from ..models import Group, Post, Follow, User
 
 
 class PostsURLTests(TestCase):
@@ -14,11 +14,13 @@ class PostsURLTests(TestCase):
         cls.user = User.objects.create_user(username='HasNoName')
         cls.group = Group.objects.create(slug='test-slug')
         cls.post = Post.objects.create(author=cls.auth, group=cls.group,)
+        cls.follow = Follow.objects.create(user=cls.user,
+                                           author=cls.auth)
         cls.INDEX = reverse('posts:index')
         cls.GROUP_POSTS = reverse('posts:group_posts_list',
                                   kwargs={'slug': cls.group.slug})
         cls.PROFILE = reverse('posts:profile',
-                              kwargs={'username': cls.user.username})
+                              kwargs={'username': cls.user})
         cls.POST_DETAIL = reverse('posts:post_detail',
                                   kwargs={'post_id': cls.post.id})
         cls.POST_CREATE = reverse('posts:post_create')
@@ -31,6 +33,10 @@ class PostsURLTests(TestCase):
         cls.PROFILE_FOLLOW = reverse('posts:profile_follow',
                                      kwargs={'username': cls.auth})
         cls.PROFILE_UNFOLLOW = reverse('posts:profile_unfollow',
+                                       kwargs={'username': cls.auth})
+        cls.AUTHOR_FOLLOWINGS = reverse('posts:profile_followings',
+                                        kwargs={'username': cls.auth})
+        cls.AUTHOR_FOLLOWERS = reverse('posts:profile_followers',
                                        kwargs={'username': cls.auth})
 
     def setUp(self):
@@ -48,6 +54,10 @@ class PostsURLTests(TestCase):
             (self.PROFILE_FOLLOW, f'{self.LOGIN}?next={self.PROFILE_FOLLOW}'),
             (self.PROFILE_UNFOLLOW,
              f'{self.LOGIN}?next={self.PROFILE_UNFOLLOW}'),
+            (self.AUTHOR_FOLLOWINGS,
+             f'{self.LOGIN}?next={self.AUTHOR_FOLLOWINGS}'),
+            (self.AUTHOR_FOLLOWERS,
+             f'{self.LOGIN}?next={self.AUTHOR_FOLLOWERS}'),
         ]
         for adress, redirect in url_names_redirect:
             with self.subTest(adress=adress):
@@ -71,6 +81,8 @@ class PostsURLTests(TestCase):
             ('posts/edit_post.html', self.POST_EDIT),
             ('core/404.html', '/unexisting_page/'),
             ('posts/follow.html', self.FOLLOW_INDEX),
+            ('posts/following.html', self.AUTHOR_FOLLOWINGS),
+            ('posts/follower.html', self.AUTHOR_FOLLOWERS),
         ]
         self.authorized_user.force_login(self.auth)
         for template, address in templates_pages_names:
@@ -83,14 +95,16 @@ class PostsURLTests(TestCase):
         templates_url_names = [
             (self.INDEX, '/'),
             (self.GROUP_POSTS, f'/group/{self.group.slug}/'),
-            (self.PROFILE, f'/profile/{self.user.username}/'),
+            (self.PROFILE, f'/profile/{self.user}/'),
             (self.POST_DETAIL, f'/posts/{self.post.id}/'),
             (self.POST_CREATE, '/create/'),
             (self.POST_EDIT, f'/posts/{self.post.id}/edit/'),
             (self.POST_COMMENT, f'/posts/{self.post.id}/comment/'),
             (self.FOLLOW_INDEX, '/follow/'),
-            (self.PROFILE_FOLLOW, f'/profile/{self.auth.username}/follow/'),
-            (self.PROFILE_UNFOLLOW, f'/profile/{self.auth.username}/unfollow/')
+            (self.PROFILE_FOLLOW, f'/profile/{self.auth}/follow/'),
+            (self.PROFILE_UNFOLLOW, f'/profile/{self.auth}/unfollow/'),
+            (self.AUTHOR_FOLLOWINGS, f'/profile/{self.auth}/followings/'),
+            (self.AUTHOR_FOLLOWERS, f'/profile/{self.auth}/followers/'),
         ]
         for address, urls in templates_url_names:
             with self.subTest(address=address):
@@ -110,6 +124,8 @@ class PostsURLTests(TestCase):
             (self.FOLLOW_INDEX, HTTPStatus.OK, False),
             (self.PROFILE_FOLLOW, HTTPStatus.FOUND, False),
             (self.PROFILE_UNFOLLOW, HTTPStatus.FOUND, False),
+            (self.AUTHOR_FOLLOWINGS, HTTPStatus.OK, False),
+            (self.AUTHOR_FOLLOWERS, HTTPStatus.OK, False),
         ]
         for address, status, boolean_item in names:
             with self.subTest(address=address):
