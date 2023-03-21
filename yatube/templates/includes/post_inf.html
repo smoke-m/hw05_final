@@ -25,7 +25,8 @@
   {% if view_name != 'posts:post_detail' %}
     <p> количество комментариев к посту: {{ post.comments.count }}
       <a href="{% url 'posts:post_detail' post.pk %}">список</a></p>
-    <a href="{% url 'posts:post_detail' post.pk %}">подробная информация</a><br>
+    <a class="btn btn-sm btn-primary"
+       href="{% url 'posts:post_detail' post.pk %}" role="button">подробная информация</a>
   {% endif %}
 </article>
 {% endwith %}

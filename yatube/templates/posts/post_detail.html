@@ -8,7 +8,10 @@
   <h3> Всего постов автора: {{ post_count }} </h3> 
   {% include 'includes/post_inf.html' %}
   {% if request.user == post.author %}
-    <a href="{% url 'posts:post_edit' post.id %}">Редактировать пост</a>
+    <a class="btn btn-sm btn-light"
+       href="{% url 'posts:post_edit' post.id %}" role="button">редактировать пост</a>
+    <a class="btn btn-sm btn-light"
+       href="{% url 'posts:post_del' post.id %}" role="button">удалить пост</a>
   {% endif %}
   {% for comment in comments %}
     <div class="media mb-4">
@@ -23,6 +26,11 @@
         </p>
       </div>
     </div>
+    {% if comment.author == request.user %}
+      <a class="btn btn-sm btn-light"
+        href="{% url 'posts:del_comment' comment.pk %}" role="button">
+        удалить комментарий</a>
+    {% endif %}
   {% endfor %} 
   {% if user.is_authenticated %}
     <div class="card my-4">

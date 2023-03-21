@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}
+  Авторы постов
+{% endblock %}
+{% block content %}
+  <h1>Список авторов, опубликовавших в проекте пост.</h1>
+  <h3>Всего авторов: {{ page_obj.paginator.count }} </h3>
+  {% include 'includes/switcher.html' %}
+  {% for auth in page_obj %}
+    <a href="{% url 'posts:profile' auth.username %}">{{ auth.username }}</a>
+    <p> Электронная почта {{ auth.username }}: {{ auth.email }}</p>
+    <p> Полное имя {{ auth.username }}: {{ auth.get_full_name }}</p>
+    <p> В проекте {{ auth.username }} c {{ auth.date_joined }}</p>
+    <p> последний раз был {{ auth.username }} {{ auth.last_login }}</p>
+    {% if not forloop.last %}<hr>{% endif %}
+  {% endfor %}
+  {% include 'includes/paginator.html' %}
+{% endblock %}

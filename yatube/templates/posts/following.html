@@ -9,6 +9,8 @@
     <a href="{% url 'posts:profile' following.user.username %}">{{ following.user.username }}</a>
     <p> Электронная почта {{ following.user.username }}: {{ following.user.email }}</p>
     <p> Полное имя: {{ following.user.username }}: {{ following.user.get_full_name }}</p>
+    <p> В проекте {{ following.user.username }} c {{ following.user.date_joined }}</p>
+    <p> последний раз был {{ following.user.username }} {{ following.user.last_login }}</p>
     {% if not forloop.last %}<hr>{% endif %}
   {% endfor %}
   {% include 'includes/paginator.html' %}

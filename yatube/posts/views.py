@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 
-from .models import Post, Group, Follow, User
+from .models import Post, Group, Follow, Comment, User
 from .forms import PostForm, CommentForm
 
 
@@ -16,6 +16,17 @@ def index(request):
     posts = Post.objects.select_related('author', 'group')
     context = {
         'page_obj': paginator_def(posts, request.GET.get('page')),
+    }
+    return render(request, template, context)
+
+
+def authors_index(request):
+    template = 'posts/authors_index.html'
+    posts = Post.objects.select_related(
+        'author').values_list('author', flat=True)
+    authors = User.objects.filter(pk__in=posts)
+    context = {
+        'page_obj': paginator_def(authors, request.GET.get('page')),
     }
     return render(request, template, context)
 
@@ -96,6 +107,15 @@ def post_create(request):
 
 
 @login_required
+def post_del(request, post_id):
+    post = get_object_or_404(
+        Post.objects.select_related('author', 'group'), pk=post_id)
+    if post.author == request.user:
+        post.delete()
+    return redirect('posts:profile', request.user)
+
+
+@login_required
 def add_comment(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     form = CommentForm(request.POST or None)
@@ -104,6 +124,16 @@ def add_comment(request, post_id):
         comment.author = request.user
         comment.post = post
         comment.save()
+    return redirect('posts:post_detail', post_id=post_id)
+
+
+@login_required
+def del_comment(request, comment_id):
+    comment = get_object_or_404(
+        Comment.objects.select_related('author'), pk=comment_id)
+    post_id = comment.post.pk
+    if comment.author == request.user:
+        comment.delete()
     return redirect('posts:post_detail', post_id=post_id)
 
 
