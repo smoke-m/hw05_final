@@ -1,16 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
+from django import forms
 
 
 User = get_user_model()
 
 
 class CreationForm(UserCreationForm):
-
-    def __init__(self, *args, **kwargs):
-        super(CreationForm, self).__init__(*args, **kwargs)
-
-        self.fields['email'].required = True
+    email = forms.EmailField(required=True)
+    User._meta.get_field('email')._unique = True
 
     class Meta(UserCreationForm.Meta):
         model = User

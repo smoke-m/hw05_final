@@ -22,9 +22,8 @@ def index(request):
 
 def authors_index(request):
     template = 'posts/authors_index.html'
-    posts = Post.objects.select_related(
-        'author').values_list('author', flat=True)
-    authors = User.objects.filter(pk__in=posts)
+    authors = User.objects.filter(
+        posts__isnull=False).order_by('username').distinct()
     context = {
         'page_obj': paginator_def(authors, request.GET.get('page')),
     }
@@ -108,8 +107,7 @@ def post_create(request):
 
 @login_required
 def post_del(request, post_id):
-    post = get_object_or_404(
-        Post.objects.select_related('author', 'group'), pk=post_id)
+    post = get_object_or_404(Post, pk=post_id)
     if post.author == request.user:
         post.delete()
     return redirect('posts:profile', request.user)
@@ -129,8 +127,7 @@ def add_comment(request, post_id):
 
 @login_required
 def del_comment(request, comment_id):
-    comment = get_object_or_404(
-        Comment.objects.select_related('author'), pk=comment_id)
+    comment = get_object_or_404(Comment, pk=comment_id)
     post_id = comment.post.pk
     if comment.author == request.user:
         comment.delete()
